@@ -5,6 +5,8 @@ import Calender from '../components/Calender'
 import TransactionForm from '../components/TransactionForm'
 import TransactionMenu from '../components/TransactionMenu'
 import { Transaction } from '../types'
+import { useState } from 'react'
+import { format } from 'date-fns'
 
 interface HomeProps {
   monthlyTransactions: Transaction[]
@@ -12,6 +14,9 @@ interface HomeProps {
 }
 
 const Home = ({monthlyTransactions, setCurrentMonth}: HomeProps) => {
+  const today = format(new Date(), "yyyy-MM-dd");
+  console.log("kokol", today)
+  const[currentDay, setCurrentDay] = useState(today);
   return (
     <Box  sx={{display: "flex"}}>
       {/* 左側 */}
