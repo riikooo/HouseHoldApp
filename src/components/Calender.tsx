@@ -1,5 +1,6 @@
 import React from 'react'
 import FullCalendar from '@fullcalendar/react'
+import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import dayGridPlugin from "@fullcalendar/daygrid"
 import jaLocale from "@fullcalendar/core/locales/ja"
 import "../calendar.css"
@@ -10,9 +11,14 @@ import { formatCurrency } from '../utils/formatting'
 
 interface CalendarPropos {
   monthlyTransactions: Transaction[],
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  setCurrentDay: React.Dispatch<React.SetStateAction<string>>;
 }
-const Calender = ({monthlyTransactions, setCurrentMonth}: CalendarPropos) => {
+const Calender = ({
+  monthlyTransactions,
+  setCurrentMonth,
+  setCurrentDay,
+}: CalendarPropos) => {
   const events = [
     { title: 'Meeting', start: "2024-04-10" },
     { title: 'Meeting', start: "2024-04-13", income: 300, expense: 200, balance:400 },
@@ -44,7 +50,6 @@ const Calender = ({monthlyTransactions, setCurrentMonth}: CalendarPropos) => {
   console.log(calendarEvents);
 
 
-
   const renderEventContent = (eventInfo: EventContentArg) => {
     // console.log("イベント", eventInfo);
     return (
@@ -65,16 +70,21 @@ const Calender = ({monthlyTransactions, setCurrentMonth}: CalendarPropos) => {
   const handleDateSet = (datesetInfo:DatesSetArg) => {
     // console.log("データセットインフォ",datesetInfo);
     setCurrentMonth(datesetInfo.view.currentStart)
+  };
+  const handleDateClick = (dateInfo: DateClickArg) => {
+    console.log(dateInfo);
+    setCurrentDay(dateInfo.dateStr);
   }
 
   return (
     <FullCalendar
       locale={jaLocale}
-      plugins={[dayGridPlugin]}
+      plugins={[dayGridPlugin, interactionPlugin ]}
       initialView='dayGridMonth'
       events={calendarEvents}
       eventContent={renderEventContent}
       datesSet={handleDateSet}
+      dateClick={handleDateClick}
     />
   )
 }

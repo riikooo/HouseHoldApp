@@ -17,12 +17,21 @@ const Home = ({monthlyTransactions, setCurrentMonth}: HomeProps) => {
   const today = format(new Date(), "yyyy-MM-dd");
   console.log("kokol", today)
   const[currentDay, setCurrentDay] = useState(today);
+
+  const dailyTransactions = monthlyTransactions.filter((transaction) => {
+    return transaction.date === currentDay;
+  });
+  console.log("これ", dailyTransactions);
   return (
     <Box  sx={{display: "flex"}}>
       {/* 左側 */}
       <Box sx={{flexGrow: 1}}>
         <MonthlySummary monthlyTransactions={monthlyTransactions}/>
-        <Calender monthlyTransactions={monthlyTransactions} setCurrentMonth={setCurrentMonth}/>
+        <Calender
+          monthlyTransactions={monthlyTransactions}
+          setCurrentMonth={setCurrentMonth}
+          setCurrentDay={setCurrentDay}
+        />
       </Box>
       {/* 右側 */}
       <Box>
