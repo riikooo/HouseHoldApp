@@ -26,7 +26,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Category } from "@mui/icons-material";
 import { ExpenseCategory, IncomeCategory } from "../types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { transactionSchema } from "../validations/schema";
+import { Schema, transactionSchema } from "../validations/schema";
 
 interface TransactionFormProps {
   onCloseForm: () => void;
@@ -69,7 +69,7 @@ const TransactionForm = ({
     watch,
     formState:{errors},
     handleSubmit,
-  } = useForm({
+  } = useForm<Schema>({
     defaultValues: {
       type: "expense",
       date: currentDay,
@@ -99,9 +99,11 @@ const TransactionForm = ({
     setCategories(newCategories);
   }, [currentType]);
 
-  const onSubmit = (data: any) => {
-    console.log(data);
-  }
+  // 送信処理
+  const onSubmit = (data:Schema) => {
+    console.log("ここです", data);
+  };
+
   return (
     <Box
       sx={{
