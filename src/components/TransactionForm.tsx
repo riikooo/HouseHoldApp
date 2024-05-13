@@ -52,7 +52,7 @@ const TransactionForm = ({
   const expenseCategories: CategoryItem[] = [
     {label: "食費", icon: <DinnerDiningIcon fontSize='small'/>},
     {label: "日用品", icon:<DryCleaningIcon fontSize='small'/>},
-    {label: "住居費", icon: <HouseIcon fontSize='small'/>},
+    {label: "居住費", icon: <HouseIcon fontSize='small'/>},
     {label: "交際費", icon: <LiquorIcon fontSize='small'/>},
     {label: "娯楽", icon: <SportsTennisIcon fontSize='small'/>},
     {label: "交通費", icon: <CommuteIcon fontSize='small'/>}
@@ -71,6 +71,7 @@ const TransactionForm = ({
     watch,
     formState:{errors},
     handleSubmit,
+    reset,
   } = useForm<Schema>({
     defaultValues: {
       type: "expense",
@@ -82,9 +83,10 @@ const TransactionForm = ({
     resolver: zodResolver(transactionSchema),
   });
   // console.log(errors);
-
+//収支タイプを切り替える↓
   const incomeExpenseToggle = (type: IncomeExpense) => {
     setValue("type", type);
+    setValue("category", "");
   };
 
   // 収支タイプを監視
@@ -103,8 +105,16 @@ const TransactionForm = ({
 
   // 送信処理
   const onSubmit: SubmitHandler<Schema> = (data) => {
-    console.log("ここです", data);
+    // console.log("ここです", data);
     onSaveTransaction(data);
+
+    reset({
+      type: "expense",
+      date: currentDay,
+      amount: 0,
+      category: "",
+      content: "",
+    });
   };
 
   return (
