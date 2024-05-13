@@ -10,7 +10,7 @@ import { theme } from './theme/theme';
 import { ThemeProvider } from '@emotion/react';
 import { CssBaseline } from '@mui/material';
 import { Transaction } from './types/index';
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
 import { format } from 'date-fns';
 import { formatMonth } from './utils/formatting';
@@ -28,7 +28,7 @@ function App() {
   // ここはDate()ってことで日付の情報を入れてる。TSがDATE型だと推論してくれてるから、
   // <Date>って感じで型を指定してあげなくてもいい↓
   const[currentMonth, setCurrentMonth] = useState(new Date());
-  // console.log(currentMonth)
+
   // ↓ここで日付を「2024-04」のフォーマットに変換（そういうnpmのツール）
   const P = format(currentMonth, "yyyy-MM");
   // console.log("これ",P);
@@ -53,11 +53,11 @@ function App() {
         if(isFireStoreError(err)) {
           // ↓エラーが文字列で返ってきてるからJSON形式に戻して見てみたやつ
           // console.error(JSON.stringify(err, null, 2));
-          console.error("firebaseのエラーは：",err)
+          console.error("firebaseのエラーは :",err)
           // console.error("firebaseのエラーメッセージは：",err.message)
           // console.error("firebaseのエラーコードは：",err.code)
         } else {
-          console.error("一般的なエラーは：",err)
+          console.error("一般的なエラーは :",err)
         }
       }
     }
@@ -92,14 +92,33 @@ function App() {
       if(isFireStoreError(err)) {
         // ↓エラーが文字列で返ってきてるからJSON形式に戻して見てみたやつ
         // console.error(JSON.stringify(err, null, 2));
-        console.error("firebaseのエラーは：",err);
+        console.error("firebaseのエラーは :",err);
         // console.error("firebaseのエラーメッセージは：",err.message)
         // console.error("firebaseのエラーコードは：",err.code)
       } else {
-        console.error("一般的なエラーは：",err);
+        console.error("一般的なエラーは :",err);
       }
     }
   };
+
+  //削除の処理
+  const handleDeleteTransaction = async(transactionId: string) => {
+    try {
+      //firebaseのデータ削除
+      await deleteDoc(doc(db, "Transactions", transactionId));
+
+    } catch (err) {
+      if(isFireStoreError(err)) {
+        // ↓エラーが文字列で返ってきてるからJSON形式に戻して見てみたやつ
+        // console.error(JSON.stringify(err, null, 2));
+        console.error("firebaseのエラーは :",err)
+        // console.error("firebaseのエラーメッセージは：",err.message)
+        // console.error("firebaseのエラーコードは：",err.code)
+      } else {
+        console.error("一般的なエラーは :",err)
+      }
+    }
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -113,6 +132,7 @@ function App() {
                 monthlyTransactions={monthlyTransactions}
                 setCurrentMonth={setCurrentMonth}
                 onSaveTransaction={handleSaveTransaction}
+                onDeleteTransaction={handleDeleteTransaction}
                 />}/>
             <Route path='/report' element={<Report />}/>
             <Route path='*' element={<NoMatch />}/>

@@ -12,27 +12,41 @@ import { Schema } from "../validations/schema";
 interface HomeProps {
   monthlyTransactions: Transaction[]
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
-  onSaveTransaction: (transaction: Schema) => Promise<void>
+  onSaveTransaction: (transaction: Schema) => Promise<void>;
+  onDeleteTransaction:  (transactionId: string) => Promise<void>;
 }
 
-const Home = ({monthlyTransactions, setCurrentMonth, onSaveTransaction}: HomeProps) => {
+const Home = ({monthlyTransactions, setCurrentMonth, onSaveTransaction, onDeleteTransaction }: HomeProps) => {
   const today = format(new Date(), "yyyy-MM-dd");
   console.log("kokol", today)
   const[currentDay, setCurrentDay] = useState(today);
   const[isEntryDrawerOpen,setIsEntryDrawerOpen] = useState(false);
+  const[selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const dailyTransactions = monthlyTransactions.filter((transaction) => {
     return transaction.date === currentDay;
   });
   // console.log("これ", dailyTransactions);
   const closeForm = () =>  {
-    setIsEntryDrawerOpen(!isEntryDrawerOpen)
+    setIsEntryDrawerOpen(!isEntryDrawerOpen);
+    setSelectedTransaction(null);
   };
 
   //フォームの開閉
   const  handleAddTransactionForm = () => {
+    if (selectedTransaction) {
+      setSelectedTransaction(null);
+    } else {
     setIsEntryDrawerOpen(!isEntryDrawerOpen);
+    }
   };
+
+  //取引が選択されたときの処理
+  const handleSelectTransaction = (transaction: Transaction) => {
+    // console.log("iiiiiioooo", transaction);
+    setIsEntryDrawerOpen(true);
+    setSelectedTransaction(transaction);
+  }
 
   return (
     <Box  sx={{display: "flex"}}>
@@ -52,12 +66,15 @@ const Home = ({monthlyTransactions, setCurrentMonth, onSaveTransaction}: HomePro
           dailyTransactions={dailyTransactions}
           currentDay={currentDay}
           onAddTransactionForm={handleAddTransactionForm}
+          onSelectTransaction={handleSelectTransaction}
         />
         <TransactionForm
           onCloseForm={closeForm}
           isEntryDrawerOpen={isEntryDrawerOpen}
           currentDay={currentDay}
           onSaveTransaction={onSaveTransaction}
+          selectedTransaction={selectedTransaction}
+          onDeleteTransaction={onDeleteTransaction}
         />
 
       </Box>

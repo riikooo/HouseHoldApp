@@ -27,12 +27,15 @@ import { Category } from "@mui/icons-material";
 import { ExpenseCategory, IncomeCategory } from "../types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Schema, transactionSchema } from "../validations/schema";
+import { Transaction } from '../types'
 
 interface TransactionFormProps {
   onCloseForm: () => void;
   isEntryDrawerOpen: boolean;
   currentDay: string;
   onSaveTransaction: ( transaction: Schema ) => Promise<void>;
+  selectedTransaction: Transaction | null;
+  onDeleteTransaction: (transactionId: string) => Promise<void>;
 }
 type IncomeExpense = "income" | "expense";
 
@@ -46,6 +49,8 @@ const TransactionForm = ({
   isEntryDrawerOpen,
   currentDay,
   onSaveTransaction,
+  selectedTransaction,
+  onDeleteTransaction
 }:TransactionFormProps ) => {
   const formWidth = 320;
 
@@ -115,6 +120,29 @@ const TransactionForm = ({
       category: "",
       content: "",
     });
+  };
+
+  useEffect(() => {
+    if (selectedTransaction) {
+      setValue("type", selectedTransaction.type);
+      setValue("date", selectedTransaction.date);
+      setValue("amount", selectedTransaction.amount);
+      setValue("category", selectedTransaction.category);
+      setValue("content", selectedTransaction.content);
+    } else {
+      reset({
+      type: "expense",
+      date: currentDay,
+      amount: 0,
+      category: "",
+      content: "",})
+    }
+  }, [selectedTransaction]);
+
+  const handleDelete = () => {
+    if (selectedTransaction){
+      onDeleteTransaction(selectedTransaction.id);
+    }
   };
 
   return (
@@ -254,6 +282,16 @@ const TransactionForm = ({
           <Button type="submit" variant="contained" color={currentType === "income" ? "primary" : "error"} fullWidth>
             保存
           </Button>
+          {selectedTransaction && (
+            <Button
+              onClick={handleDelete}
+              variant="outlined"
+              color={"secondary"}
+              fullWidth
+            >
+              削除
+            </Button>
+          )}
         </Stack>
       </Box>
     </Box>
