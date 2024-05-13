@@ -22,7 +22,7 @@ import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import SavingsIcon from '@mui/icons-material/Savings';
 // アイコンたち↑
-import { Controller, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Category } from "@mui/icons-material";
 import { ExpenseCategory, IncomeCategory } from "../types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,7 @@ interface TransactionFormProps {
   onCloseForm: () => void;
   isEntryDrawerOpen: boolean;
   currentDay: string;
+  onSaveTransaction: ( transaction: Schema ) => Promise<void>;
 }
 type IncomeExpense = "income" | "expense";
 
@@ -44,6 +45,7 @@ const TransactionForm = ({
   onCloseForm,
   isEntryDrawerOpen,
   currentDay,
+  onSaveTransaction,
 }:TransactionFormProps ) => {
   const formWidth = 320;
 
@@ -100,8 +102,9 @@ const TransactionForm = ({
   }, [currentType]);
 
   // 送信処理
-  const onSubmit = (data:Schema) => {
+  const onSubmit: SubmitHandler<Schema> = (data) => {
     console.log("ここです", data);
+    onSaveTransaction(data);
   };
 
   return (
