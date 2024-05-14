@@ -14,7 +14,7 @@ interface MonthSelectorProps {
 const MonthSelector = ({currentMonth, setCurrentMonth}: MonthSelectorProps) => {
 
   const handleDateChange = (newDate:Date | null) => {
-    console.log("何が入ってる？？？？？", newDate);
+    // console.log("何が入ってる？？？？？", newDate);
     if(newDate) {
       setCurrentMonth(newDate);
     }
