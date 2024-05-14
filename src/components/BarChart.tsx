@@ -8,8 +8,12 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { calculateDailyBalances } from '../utils/financeCalculations';
+import { Transaction } from '../types'
+import { useTheme } from '@mui/material';
 
 ChartJS.register(
   CategoryScale,
@@ -20,48 +24,51 @@ ChartJS.register(
   Legend
 );
 
-const BarChart = () => {
+interface BarChartProps {
+  monthlyTransactions: Transaction[];
+}
 
+const BarChart = ({ monthlyTransactions }: BarChartProps) => {
+  const theme = useTheme()
   const options = {
+    maintainAspectRatio: false,
     responsive: true,
     plugins: {
-      legend: {
-        position: 'top' as const,
-      },
+      // legend: {
+      //   position: 'top' as const,
+      // },
       title: {
         display: true,
-        text: 'Chart.js Bar Chart',
+        text: '日別収支',
       },
     },
   };
 
-  const labels = [
-    '2024-01-20',
-    '2024-01-23',
-    '2024-01-24',
-    '2024-01-25',
-    '2024-01-26',
-    '2024-01-27',
-    '2024-01-28',
-  ];
+  const dailyBalances = calculateDailyBalances(monthlyTransactions);
+  // console.log("デイリーバランス", dailyBalances);
+  // console.log("monthlyTransactions", monthlyTransactions);
 
-  const data = {
-    labels,
+  const dateLabels = Object.keys(dailyBalances).sort();
+  // console.log("データラベル ",dateLabels);
+  const expenseData = dateLabels.map((day) => dailyBalances[day].expense)
+  const incomeData = dateLabels.map((day) => dailyBalances[day].income)
+
+  const data:ChartData<"bar"> = {
+    labels: dateLabels,
     datasets: [
       {
         label: '支出',
-        data: [100, 200, 300, 400, 500, 600, 700],
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        data: expenseData,
+        backgroundColor: theme.palette.expenseColor.light,
       },
       {
         label: '収入',
-        data: [900, 400, 700, 100, 900, 200, 400],
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        data: incomeData,
+        backgroundColor: theme.palette.incomeColor.light,
       },
     ],
   };
-  
   return <Bar options={options} data={data} />;
 }
 
-export default BarChart
+export default BarChart;
