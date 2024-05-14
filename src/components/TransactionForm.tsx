@@ -36,6 +36,8 @@ interface TransactionFormProps {
   onSaveTransaction: ( transaction: Schema ) => Promise<void>;
   selectedTransaction: Transaction | null;
   onDeleteTransaction: (transactionId: string) => Promise<void>;
+  setSelectedTransaction: React.Dispatch<React.SetStateAction<Transaction | null>>;
+  onUpdateTransaction: (transaction: Schema, transactionId: string) => Promise<void>;
 }
 type IncomeExpense = "income" | "expense";
 
@@ -50,7 +52,9 @@ const TransactionForm = ({
   currentDay,
   onSaveTransaction,
   selectedTransaction,
-  onDeleteTransaction
+  setSelectedTransaction,
+  onDeleteTransaction,
+  onUpdateTransaction,
 }:TransactionFormProps ) => {
   const formWidth = 320;
 
@@ -111,8 +115,25 @@ const TransactionForm = ({
   // 送信処理
   const onSubmit: SubmitHandler<Schema> = (data) => {
     // console.log("ここです", data);
-    onSaveTransaction(data);
+    if (selectedTransaction) {
+      onUpdateTransaction(data, selectedTransaction.id)
+      .then(() => {
+        setSelectedTransaction(null);
+        // console.log("更新しました");
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+    } else {
+      onSaveTransaction(data)
+      .then(() => {
+        console.log("保存しました");
+      })
+      .catch((error) => {
+        console.error(error);
+      })
 
+    }
     reset({
       type: "expense",
       date: currentDay,
@@ -123,11 +144,24 @@ const TransactionForm = ({
   };
 
   useEffect(() => {
+    //選択肢が更新されたか確認
+    // ↓このif文がtrueなら
+    if (selectedTransaction) {
+    // ↓これを返し、ここではカテゴリーの選択肢の中に選択された名前と一致する名前があるか調べてる。
+      const categoryExists = categories.some(
+        // 一致する名前があったら、選択肢が更新されたということ
+        (category) => category.label === selectedTransaction.category
+      );
+      setValue("category", categoryExists ? selectedTransaction.category : "");
+    }
+  }, [selectedTransaction, categories]);
+
+  // フォームの内容を更新
+  useEffect(() => {
     if (selectedTransaction) {
       setValue("type", selectedTransaction.type);
       setValue("date", selectedTransaction.date);
       setValue("amount", selectedTransaction.amount);
-      setValue("category", selectedTransaction.category);
       setValue("content", selectedTransaction.content);
     } else {
       reset({
@@ -142,6 +176,7 @@ const TransactionForm = ({
   const handleDelete = () => {
     if (selectedTransaction){
       onDeleteTransaction(selectedTransaction.id);
+      setSelectedTransaction(null);
     }
   };
 
@@ -280,7 +315,7 @@ const TransactionForm = ({
           />
           {/* 保存ボタン */}
           <Button type="submit" variant="contained" color={currentType === "income" ? "primary" : "error"} fullWidth>
-            保存
+            {selectedTransaction ? "更新" : "保存"}
           </Button>
           {selectedTransaction && (
             <Button

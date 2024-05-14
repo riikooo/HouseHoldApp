@@ -10,7 +10,7 @@ import { theme } from './theme/theme';
 import { ThemeProvider } from '@emotion/react';
 import { CssBaseline } from '@mui/material';
 import { Transaction } from './types/index';
-import { addDoc, collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { format } from 'date-fns';
 import { formatMonth } from './utils/formatting';
@@ -106,7 +106,41 @@ function App() {
     try {
       //firebaseのデータ削除
       await deleteDoc(doc(db, "Transactions", transactionId));
-
+      const filterdTransactions = transactions.filter((transaction) => transaction.id !== transactionId);
+      // console.log(filterdTransactions)
+      setTransactions(filterdTransactions);
+    } catch (err) {
+      if(isFireStoreError(err)) {
+        // ↓エラーが文字列で返ってきてるからJSON形式に戻して見てみたやつ
+        // console.error(JSON.stringify(err, null, 2));
+        console.error("firebaseのエラーは :",err)
+        // console.error("firebaseのエラーメッセージは：",err.message)
+        // console.error("firebaseのエラーコードは：",err.code)
+      } else {
+        console.error("一般的なエラーは :",err)
+      }
+    }
+  }
+// 更新の処理
+  const handleUpdateTransaction = async(
+    transaction: Schema,
+    transactionId: string
+  ) => {
+    try {
+      // firestore更新処理
+      // ↓ ここでfirestoreから更新対象のドキュメントを参照してる
+      // (更新対象を取得してる)
+      const docRef = doc(db, "Transactions", transactionId);
+      // Set the "capital" field of the city 'DC'
+      // ↓ ここで実際に更新
+      await updateDoc(docRef, transaction);
+      // フロント更新
+      const updateTransactions = transactions.map((t) =>
+        t.id === transactionId ? {...t, ...transaction} : t
+      ) as Transaction[];
+      //↑これを書くと、「setTransactions(updateTransactions)」で型を合わせろって言われるやつを解消できる
+      console.log("更新してね〜〜",updateTransactions);
+      setTransactions(updateTransactions);
     } catch (err) {
       if(isFireStoreError(err)) {
         // ↓エラーが文字列で返ってきてるからJSON形式に戻して見てみたやつ
@@ -133,6 +167,7 @@ function App() {
                 setCurrentMonth={setCurrentMonth}
                 onSaveTransaction={handleSaveTransaction}
                 onDeleteTransaction={handleDeleteTransaction}
+                onUpdateTransaction={handleUpdateTransaction}
                 />}/>
             <Route path='/report' element={<Report />}/>
             <Route path='*' element={<NoMatch />}/>
