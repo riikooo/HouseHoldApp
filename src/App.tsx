@@ -28,7 +28,7 @@ function App() {
   // ここはDate()ってことで日付の情報を入れてる。TSがDATE型だと推論してくれてるから、
   // <Date>って感じで型を指定してあげなくてもいい↓
   const[currentMonth, setCurrentMonth] = useState(new Date());
-
+  const[isLoading,setIsLoading] = useState(true);
   // ↓ここで日付を「2024-04」のフォーマットに変換（そういうnpmのツール）
   const P = format(currentMonth, "yyyy-MM");
   // console.log("これ",P);
@@ -59,10 +59,13 @@ function App() {
         } else {
           console.error("一般的なエラーは :",err)
         }
+      } finally {
+        setIsLoading(false);
       }
     }
     fecheTransacutions();
   }, [])
+  console.log("ローディング？", isLoading);
 // currentMonthに今日の日付が入ってる。
 // startsWithで、currentMonthと同じ日付のデータだけを抽出するようにしている。
   const monthlyTransactions = transactions.filter((transaction) => {
@@ -176,6 +179,7 @@ function App() {
                   currentMonth={currentMonth}
                   setCurrentMonth={setCurrentMonth}
                   monthlyTransactions={monthlyTransactions}
+                  isLoading={isLoading}
                 />
               }
             />

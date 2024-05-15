@@ -13,7 +13,8 @@ import {
 import { Bar } from 'react-chartjs-2';
 import { calculateDailyBalances } from '../utils/financeCalculations';
 import { Transaction } from '../types'
-import { useTheme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 
 ChartJS.register(
   CategoryScale,
@@ -26,9 +27,10 @@ ChartJS.register(
 
 interface BarChartProps {
   monthlyTransactions: Transaction[];
+  isLoading: boolean;
 }
 
-const BarChart = ({ monthlyTransactions }: BarChartProps) => {
+const BarChart = ({ monthlyTransactions, isLoading }: BarChartProps) => {
   const theme = useTheme()
   const options = {
     maintainAspectRatio: false,
@@ -68,7 +70,22 @@ const BarChart = ({ monthlyTransactions }: BarChartProps) => {
       },
     ],
   };
-  return <Bar options={options} data={data} />;
+  return (
+    <Box sx={{
+        flexGrow: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        }}>
+      {isLoading ? (
+        <CircularProgress />
+      ) : monthlyTransactions.length > 0 ? (
+        <Bar options={options} data={data} />
+      ) : (
+        <Typography>この月はデータがないです</Typography>
+      )}
+    </Box>
+  );
 }
 
 export default BarChart;
